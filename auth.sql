@@ -36,7 +36,7 @@ create table department (
 
 CREATE table employee (
                           id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-                          employee_id uuid REFERENCES auth(id) ON DELETE CASCADE PRIMARY KEY,
+                          employee_id uuid REFERENCES auth(id) ON DELETE CASCADE,
                           first_name varchar(255) not null default '',
                           last_name varchar(255) not null default '',
                           gender int, -- 1: male, 2: female, 3: other,
@@ -48,18 +48,18 @@ CREATE table employee (
                           phone_number varchar(255),
                           degree_name varchar(255),
                           degree_year int,
-                          department_id uuid REFERENCES department(id) not null
+                          department_id uuid REFERENCES department(id) not null,
                           employee_type int -- 1: nurse, 2: doctor
 );
 
 create table nurse (
                       id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-                       nurse_id uuid REFERENCES employee(id) ON DELETE CASCADE PRIMARY KEY
+                       nurse_id uuid REFERENCES employee(id) ON DELETE CASCADE
 );
 
 create table doctor (
                           id uuid DEFAULT gen_random_uuid() NOT NULL primary key,   
-                        doctor_id uuid REFERENCES employee(id) ON DELETE CASCADE PRIMARY KEY
+                        doctor_id uuid REFERENCES employee(id) ON DELETE CASCADE
 );
 
 select create_super_admin('test@gmail.com');
