@@ -8,6 +8,7 @@ create table patient (
     gender int,
     first_name varchar(255),
     last_name varchar(255),
+    current_patient_type int
 );
 
 create table invoice (
@@ -18,7 +19,9 @@ create table invoice (
 );
 
 create table inpatient (
-    id uuid references patient(id) on delete cascade primary key
+    id uuid DEFAULT gen_random_uuid() primary key,
+    patient_id uuid references patient(id) on delete cascade,
+    register_date date
 );
 
 create table inpatient_detail (
@@ -34,7 +37,9 @@ create table inpatient_detail (
 );
 
 create table outpatient (
-    id uuid references patient(id) on delete cascade primary key
+  id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
+  patient_id uuid references patient(id) on delete cascade,
+  register_date date
 );
 
 create table outpatient_detail (
