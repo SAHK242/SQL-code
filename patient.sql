@@ -71,13 +71,9 @@ create table medication (
     id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
     name varchar(255) not null,
     price float not null,
-    expired_date date
-);
-
-create table medication_effect (
-    id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-    medication_id uuid references medication(id) on delete cascade,
-    effect text
+    expired_date date,
+    quantity int,
+    effects text
 );
 
 create table treat_medication (
