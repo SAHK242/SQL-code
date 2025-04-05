@@ -80,12 +80,14 @@ create table treat_medication (
     id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
     treat_detail_id uuid references treat_detail(id) on delete cascade,
     medication_id uuid references medication(id) on delete cascade,
-    num_of_med int
+    num_of_med int,
+    prescribe_date date not null default now()
 );
 
 create table examine_medication (
     id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
     examine_detail_id uuid references examine_detail(id) on delete cascade,
     medication_id uuid references medication(id) on delete cascade,
-    num_of_med int
+    num_of_med int,
+      prescribe_date date not null default now()
 );
