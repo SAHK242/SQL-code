@@ -2,7 +2,7 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- PATIENTS table
-CREATE TABLE patients (
+CREATE TABLE patient (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
