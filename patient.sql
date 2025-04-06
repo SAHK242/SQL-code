@@ -1,93 +1,100 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- Enable UUID generation
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-create table patient (
-    id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-    phone_number varchar(255),
-    address text,
-    date_of_birth date,
-    gender int,
-    first_name varchar(255),
-    last_name varchar(255),
-    current_patient_type int
+-- PATIENTS table
+CREATE TABLE patients (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    date_of_birth DATE NOT NULL,
+    gender int4 NOT null check (gender in(1,2,3)),
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(100),
+    address TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    created_by uuid not null,
+    updated_by uuid not null
 );
 
-create table invoice (
-    id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-    invoice_date date,
-    due_date date,
-    total_amount float
+-- MEDICAL HISTORIES table (diagnosis, treatment, surgery, prescription)
+CREATE TABLE medical_histories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    patient_id UUID NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    reason text not null,
+    diagnosis text not null,
+    has_treatment boolean not null default false,
+    has_surgery boolean not null default false,
+    has_prescription boolean not null default false,
+    doctor_notes text,
+    medical_end_date TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    created_by uuid not null,
+    updated_by uuid not null
 );
 
-create table inpatient (
-    id uuid DEFAULT gen_random_uuid() primary key,
-    patient_id uuid references patient(id) on delete cascade,
-    register_date date
+create table medical_treatment(
+	id uuid primary key default gen_random_uuid(),
+	medical_history_id uuid not null references medical_histories(id) on delete cascade,
+	start_date TIMESTAMPTZ,
+	end_date TIMESTAMPTZ,
+	name text not null,
+	result text not null,
+	description text not null,
+	fee float not null,
+	main_doctor_id uuid not null,
+	support_doctor_ids text,
+	support_nurse_ids text,
+	created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    created_by uuid not null,
+    updated_by uuid not null
 );
 
-create table inpatient_detail (
-  id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-  inpatient_id uuid references inpatient(id) on delete cascade,
-  admission_date date,
-  diagnosis text,
-  sickroom varchar(255),
-  discharge_date date,
-  invoice_id uuid references invoice(id),
-  nurse_id uuid not null,
-  doctor_id uuid not null
+create table medical_surgery(
+	id uuid primary key default gen_random_uuid(),
+	medical_history_id uuid not null references medical_histories(id) on delete cascade,
+	start_date TIMESTAMPTZ,
+	end_date TIMESTAMPTZ,
+	name text not null,
+	result text not null,
+	description text not null,
+	fee float not null,
+	main_doctor_id uuid not null,
+	support_doctor_ids text,
+	support_nurse_ids text,
+	created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    created_by uuid not null,
+    updated_by uuid not null
 );
 
-create table outpatient (
-  id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-  patient_id uuid references patient(id) on delete cascade,
-  register_date date
+create table medication(
+	id uuid primary key default gen_random_uuid(),
+	name text not null, 
+	effects text not null,
+	expired_date TIMESTAMPTZ not null,
+	quantity int8 not null,
+	price float,
+	created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    created_by uuid not null,
+    updated_by uuid not null
 );
 
-create table outpatient_detail (
-  id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-  outpatient_id uuid references outpatient(id) on delete cascade,
-  invoice_id uuid references invoice(id),
-  doctor_id uuid not null
+create table medical_prescription(
+	id uuid primary key default gen_random_uuid(),
+	medical_history_id uuid not null references medical_histories(id) on delete cascade,
+	prescription_date TIMESTAMPTZ default now(),
+	fee float not null,
+	created_at TIMESTAMPTZ DEFAULT now(),
+    created_by uuid not null
 );
 
-create table treat_detail (
-  id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-  start_date date,
-  end_date date,
-  result text,
-  fee float,
-  inpatient_detail_id uuid references inpatient_detail(id)  
-);
-
-create table examine_detail (
-  id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-  examine_date date,
-  diagnosis text,
-  fee float,
-  next_appointment_date date,
-  outpatient_detail_id uuid references outpatient_detail(id)
-);
-
-create table medication (
-    id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-    name varchar(255) not null,
-    price float not null,
-    expired_date date,
-    quantity int,
-    effects text
-);
-
-create table treat_medication (
-    id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-    treat_detail_id uuid references treat_detail(id) on delete cascade,
-    medication_id uuid references medication(id) on delete cascade,
-    num_of_med int,
-    prescribe_date date not null default now()
-);
-
-create table examine_medication (
-    id uuid DEFAULT gen_random_uuid() NOT NULL primary key,
-    examine_detail_id uuid references examine_detail(id) on delete cascade,
-    medication_id uuid references medication(id) on delete cascade,
-    num_of_med int,
-      prescribe_date date not null default now()
+create table prescription_medication(
+	id uuid primary key default gen_random_uuid(),
+	prescription_id uuid not null references medical_prescription(id),
+	medication_id uuid not null references medication(id),
+	quantity int8 not null
 );
